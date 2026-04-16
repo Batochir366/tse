@@ -6,7 +6,6 @@ import {
   Users,
   CreditCard,
   GraduationCap,
-  Megaphone,
   ChevronRight,
 } from "lucide-react";
 import Header from "../../components/Header";
@@ -14,8 +13,8 @@ import EmptyState from "../../components/EmptyState";
 import StatCard from "../../components/StatCard";
 import { coursesService } from "../../lib/services/courses.service";
 import { paymentsService } from "../../lib/services/payments.service";
-import { announcementsService } from "../../lib/services/announcements.service";
 import { lessonsService } from "../../lib/services/lessons.service";
+import { usersService } from "../../lib/services/users.service";
 import { Payment } from "../../lib/api/payments.api";
 import { useToast } from "../../lib/toast";
 import { useDashboardSearch } from "../../context/DashboardSearchContext";
@@ -35,7 +34,7 @@ export default function DashboardPage() {
     courses: 0,
     payments: 0,
     lessons: 0,
-    announcements: 0,
+    users: 0,
   });
   const [recentPayments, setRecentPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,17 +42,17 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        const [courses, payments, lessons, announcements] = await Promise.allSettled([
+        const [courses, payments, lessons, users] = await Promise.allSettled([
           coursesService.getAll(),
           paymentsService.getAll(),
           lessonsService.getAll(),
-          announcementsService.getAll(),
+          usersService.getAll(),
         ]);
 
         if (courses.status === "rejected") toast.error("Курс ачаалахад алдаа гарлаа");
         if (payments.status === "rejected") toast.error("Төлбөр ачаалахад алдаа гарлаа");
         if (lessons.status === "rejected") toast.error("Хичээл ачаалахад алдаа гарлаа");
-        if (announcements.status === "rejected") toast.error("Мэдэгдэл ачаалахад алдаа гарлаа");
+        if (users.status === "rejected") toast.error("Хэрэглэгч ачаалахад алдаа гарлаа");
 
         setStats({
           courses:
@@ -62,10 +61,8 @@ export default function DashboardPage() {
             payments.status === "fulfilled" ? (payments.value as unknown[]).length : 0,
           lessons:
             lessons.status === "fulfilled" ? (lessons.value as unknown[]).length : 0,
-          announcements:
-            announcements.status === "fulfilled"
-              ? (announcements.value as unknown[]).length
-              : 0,
+          users:
+            users.status === "fulfilled" ? (users.value as unknown[]).length : 0,
         });
 
         if (payments.status === "fulfilled") {
@@ -81,13 +78,12 @@ export default function DashboardPage() {
 
   const filteredRecentPayments = useMemo(
     () =>
-      recentPayments.filter((p) => {
+      recentPayments?.length > 0 ? [] : recentPayments.filter((p) => {
         const s = STATUS_STYLE[p.status] ?? STATUS_STYLE.PENDING;
-        const userStr = p.user?.name ?? p.userId?.slice(0, 8) ?? "—";
+        const userStr =
+          typeof p.userId === "object" ? p.userId.name : "—";
         const courseStr =
-          p.itemType === "merch"
-            ? "Бараа"
-            : p.course?.name ?? p.itemId?.slice(0, 8) ?? "—";
+          p.itemType === "merch" ? "Бараа" : p.course?.name ?? "—";
         const amountStr = `₮${p.amount?.toLocaleString() ?? "—"}`;
         const dateStr = p.createdAt
           ? new Date(p.createdAt).toLocaleDateString("mn-MN")
@@ -133,9 +129,9 @@ export default function DashboardPage() {
             delay={0.14}
           />
           <StatCard
-            title="Мэдэгдэл"
-            value={loading ? "—" : stats.announcements}
-            icon={Megaphone}
+            title="Нийт хэрэглэгч"
+            value={loading ? "—" : stats.users}
+            icon={Users}
             accent="#fdcf6f"
             delay={0.21}
           />
@@ -219,6 +215,10 @@ export default function DashboardPage() {
                   filteredRecentPayments.map((payment, idx) => {
                     const s =
                       STATUS_STYLE[payment.status] ?? STATUS_STYLE.PENDING;
+                    const userName =
+                      typeof payment.userId === "object"
+                        ? payment.userId.name
+                        : "—";
                     return (
                       <motion.tr
                         key={payment._id}
@@ -236,12 +236,12 @@ export default function DashboardPage() {
                         }}
                       >
                         <td className="px-6 py-3 text-sm" style={{ color: "#000201" }}>
-                          {payment.user?.name ?? payment.userId?.slice(0, 8) ?? "—"}
+                          {userName}
                         </td>
                         <td className="px-6 py-3 text-sm" style={{ color: "#000201" }}>
                           {payment.itemType === "merch"
                             ? "Бараа"
-                            : payment.course?.name ?? payment.itemId?.slice(0, 8) ?? "—"}
+                            : payment.course?.name ?? "—"}
                         </td>
                         <td className="px-6 py-3 text-sm font-medium" style={{ color: "#000201" }}>
                           ₮{payment.amount?.toLocaleString() ?? "—"}

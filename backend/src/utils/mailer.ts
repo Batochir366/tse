@@ -10,6 +10,36 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+export const sendCourseAccessExpiringReminderEmail = async (
+  to: string,
+  displayName: string,
+  courseLines: string[],
+): Promise<void> => {
+  const list = courseLines
+    .map(
+      (line) =>
+        `<li style="margin:10px 0;color:#333;font-size:15px;">${line}</li>`,
+    )
+    .join("");
+  await transporter.sendMail({
+    from: `"TSE Academy" <${process.env.SMTP_USER}>`,
+    to,
+    subject: "Курсын эрх дуусахад 7 хоног үлдлээ",
+    html: `
+      <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 32px;">
+        <h2 style="color: #1a1a2e; margin-bottom: 12px;">Сайн байна уу, ${displayName}</h2>
+        <p style="color: #555; font-size: 15px; line-height: 1.5;">
+          Дараах курсын эрхийн хугацаа <strong>7 хоногийн дотор</strong> дуусна. Шаардлагатай бол курсаа үргэлжлүүлэн үзээрэй.
+        </p>
+        <ul style="list-style: none; padding: 0; margin: 24px 0;">
+          ${list}
+        </ul>
+        <p style="color: #888; font-size: 13px;">Асуулттай бол бидэнтэй холбогдоно уу.</p>
+      </div>
+    `,
+  });
+};
+
 export const sendOtpEmail = async (to: string, otp: string) => {
   await transporter.sendMail({
     from: `"TSE Academy" <${process.env.SMTP_USER}>`,

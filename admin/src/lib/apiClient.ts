@@ -1,7 +1,9 @@
 import axios from "axios";
 import { unwrapEncryptedResponseBody } from "./cryptoClient";
 
-export const BASE_URL = "http://localhost:3000";
+export const BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://microphysical-tameka-explicitly.ngrok-free.dev";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -32,7 +34,7 @@ apiClient.interceptors.response.use(
       error.response.data = unwrapEncryptedResponseBody(error.response.data);
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export default apiClient;
@@ -49,7 +51,7 @@ export async function callApi(
   method: string,
   path: string,
   body?: string,
-  token?: string
+  token?: string,
 ): Promise<ApiResponse> {
   const start = Date.now();
 

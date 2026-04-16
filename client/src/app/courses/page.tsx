@@ -3,12 +3,20 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { BookOpen, CalendarDays, GraduationCap, LogOut, User } from "lucide-react";
+import {
+  BookOpen,
+  CalendarDays,
+  GraduationCap,
+  LogOut,
+  Settings,
+  User,
+} from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import EmptyState from "@/components/EmptyState";
 import { coursesService } from "@/lib/services/courses.service";
 import { Course } from "@/lib/api/courses.api";
+import { userHasActiveCourseAccess } from "@/lib/courseAccess";
 import { useToast, getErrMsg } from "@/lib/toast";
 import { EMPTY_VIDEO_POSTER_SRC, fallbackToEmptyVideoPoster } from "@/lib/media";
 import Image from "next/image";
@@ -54,7 +62,10 @@ export default function CoursesPage() {
 
           <div className="flex items-center gap-3">
             {user && (
-              <div className="flex items-center gap-2 text-sm">
+              <Link
+                href="/account"
+                className="flex items-center gap-2 text-sm rounded-xl px-2 py-1 hover:opacity-90 transition-opacity"
+              >
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center bg-background"
                   style={{
@@ -63,10 +74,11 @@ export default function CoursesPage() {
                 >
                   <User className="w-4 h-4 text-primary" />
                 </div>
-                <span className="font-medium hidden sm:inline text-foreground">
+                <span className="font-medium hidden sm:inline text-foreground max-w-[10rem] truncate">
                   {user.name}
                 </span>
-              </div>
+                <Settings className="w-4 h-4 text-muted shrink-0" aria-hidden />
+              </Link>
             )}
             {user && (
               <motion.button
@@ -117,81 +129,96 @@ export default function CoursesPage() {
 
         {!loading && sortedCourses.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sortedCourses.map((course, idx) => (
-              <motion.div
-                key={course._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                whileHover={{ y: -4 }}
-              >
-                <Link href={`/courses/${course._id}`}>
-                  <div
-                    className="rounded-2xl overflow-hidden cursor-pointer h-full flex flex-col bg-surface-alt"
-                    style={{
-                      boxShadow: `
+            {sortedCourses.map((course, idx) => {
+              const hasEntitlement =
+                course.isFree || userHasActiveCourseAccess(user, course._id);
+              return (
+                <motion.div
+                  key={course._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  whileHover={{ y: -4 }}
+                >
+                  <Link href={`/courses/${course._id}`}>
+                    <div
+                      className="rounded-2xl overflow-hidden cursor-pointer h-full flex flex-col bg-surface-alt"
+                      style={{
+                        boxShadow: `
                       4px 4px 10px rgba(0,0,0,0.08),
                       -4px -4px 10px rgba(255,255,255,0.7)
                     `,
-                    }}
-                  >
-                    <div className="relative aspect-video bg-zinc-900">
-                      <img
-                        src={course.coverImage?.trim() ? course.coverImage : EMPTY_VIDEO_POSTER_SRC}
-                        alt={course.name}
-                        className="absolute inset-0 w-full h-full object-cover"
-                        onError={fallbackToEmptyVideoPoster}
-                      />
-                      {course.isFree && (
-                        <div className="absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold bg-primary/90 text-white">
-                          Үнэгүй
-                        </div>
-                      )}
-                    </div>
-                    <div className="p-5 flex-1 flex flex-col">
-                      <h3 className="text-lg font-bold mb-2 line-clamp-2 text-foreground">
-                        {course.name}
-                      </h3>
-                      <p className="text-sm mb-4 line-clamp-2 flex-1 text-muted">
-                        {course.description}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs mb-4 text-[#52525b]">
-                        <span className="inline-flex items-center gap-1.5">
-                          <BookOpen size={14} className="text-primary" />
-                          {course.lessons.length} хичээл
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
-                          <CalendarDays size={14} className="text-primary" />
-                          {course.durationDays} өдөр
-                        </span>
-                      </div>
-                      <div
-                        className="flex items-center justify-between pt-3 border-t"
-                        style={{ borderColor: "rgba(43, 95, 111, 0.1)" }}
-                      >
-                        {course.isFree ? (
-                          <span className="text-lg font-bold text-primary"></span>
-                        ) : (
-                          <span className="text-lg font-bold text-primary">
-                            ₮{course.price.toLocaleString()}
-                          </span>
+                      }}
+                    >
+                      <div className="relative aspect-video bg-zinc-900">
+                        <img
+                          src={course.coverImage?.trim() ? course.coverImage : EMPTY_VIDEO_POSTER_SRC}
+                          alt={course.name}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          onError={fallbackToEmptyVideoPoster}
+                        />
+                        {course.isFree && (
+                          <div className="absolute top-3 right-3 px-3 py-1 rounded-lg text-xs font-bold bg-primary/90 text-white">
+                            Үнэгүй
+                          </div>
                         )}
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-primary"
-                          style={{
-                            boxShadow: "4px 4px 10px rgba(43, 95, 111, 0.25)",
-                          }}
-                        >
-                          {course.isFree ? "Үзэх" : "Худалдан авах"}
-                        </motion.button>
+                      </div>
+                      <div className="p-5 flex-1 flex flex-col">
+                        <h3 className="text-lg font-bold mb-2 line-clamp-2 text-foreground">
+                          {course.name}
+                        </h3>
+                        <p className="text-sm mb-4 line-clamp-2 flex-1 text-muted">
+                          {course.description}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs mb-4 text-[#52525b]">
+                          <span className="inline-flex items-center gap-1.5">
+                            <BookOpen size={14} className="text-primary" />
+                            {course.lessons.length} хичээл
+                          </span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <CalendarDays size={14} className="text-primary" />
+                            {course.durationDays} өдөр
+                          </span>
+                        </div>
+                        {!(hasEntitlement && !course.isFree) && (
+                          <div
+                            className="flex items-center justify-between pt-3 border-t"
+                            style={{ borderColor: "rgba(43, 95, 111, 0.1)" }}
+                          >
+                            {course.isFree ? (
+                              <span className="text-sm font-semibold text-primary">
+                                Үнэгүй
+                              </span>
+                            ) : (
+                              <span className="text-lg font-bold text-primary tabular-nums">
+                                ₮{course.price.toLocaleString()}
+                              </span>
+                            )}
+                            <span
+                              className={`px-4 py-2 rounded-xl text-sm font-semibold ${
+                                course.isFree
+                                  ? "text-primary bg-primary/10"
+                                  : "text-white bg-primary"
+                              }`}
+                              style={
+                                !course.isFree
+                                  ? {
+                                      boxShadow:
+                                        "4px 4px 10px rgba(43, 95, 111, 0.25)",
+                                    }
+                                  : undefined
+                              }
+                            >
+                              {course.isFree ? "Үзэх" : "Худалдан авах"}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
+                  </Link>
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </main>

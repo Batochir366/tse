@@ -1,16 +1,26 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import { useToast, getErrMsg } from "@/lib/toast";
-import { Eye, EyeOff, LogIn, GraduationCap } from "lucide-react";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 import Image from "next/image";
 
-export default function LoginPage() {
+function safeInternalPath(next: string | null): string {
+  if (!next || typeof next !== "string") return "/courses";
+  const trimmed = next.trim();
+  if (!trimmed.startsWith("/")) return "/courses";
+  if (trimmed.startsWith("//")) return "/courses";
+  if (trimmed.includes("://")) return "/courses";
+  return trimmed;
+}
+
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const toast = useToast();
   const [email, setEmail] = useState("");
@@ -23,7 +33,8 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login({ email, password });
-      router.push("/courses");
+      const dest = safeInternalPath(searchParams.get("next"));
+      router.push(dest);
     } catch (err: unknown) {
       toast.error(getErrMsg(err, "Нэвтрэх үед алдаа гарлаа"));
     } finally {
@@ -38,12 +49,10 @@ export default function LoginPage() {
       transition={{ duration: 0.4, ease: "easeOut" }}
       className="relative w-full max-w-md mx-4"
     >
-      {/* Logo / Brand */}
       <div className="text-center mb-8">
         <Image style={{ width: "50px", height: "50px" }} src="/tse2.webp" alt="Logo" width={100} height={50} />
       </div>
 
-      {/* Card */}
       <motion.form
         onSubmit={handleSubmit}
         initial={{ opacity: 0, y: 16 }}
@@ -54,7 +63,6 @@ export default function LoginPage() {
           boxShadow: "8px 8px 16px rgba(0,0,0,0.1), -8px -8px 16px rgba(255,255,255,0.8)",
         }}
       >
-        {/* Email */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold uppercase tracking-widest text-foreground">
             И-мэйл
@@ -78,7 +86,6 @@ export default function LoginPage() {
           />
         </div>
 
-        {/* Password */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-semibold uppercase tracking-widest text-foreground">
             Нууц үг
@@ -120,7 +127,6 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {/* Submit */}
         <motion.button
           type="submit"
           disabled={loading}
@@ -149,5 +155,19 @@ export default function LoginPage() {
         </Link>
       </p>
     </motion.div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="relative w-full max-w-md mx-4 flex justify-center py-16">
+          <span className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

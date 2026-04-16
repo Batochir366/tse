@@ -1,6 +1,12 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Schema, Model } from "mongoose";
+import type { QPayUrl } from "../types/qpay";
 
-export type PaymentStatus   = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+export type PaymentStatus =
+  | 'PENDING'
+  | 'PAID'
+  | 'FAILED'
+  | 'REFUNDED'
+  | 'CANCELLED';
 export type PaymentItemType = 'course' | 'merch';
 
 export interface IPayment extends Document {
@@ -11,7 +17,11 @@ export interface IPayment extends Document {
   status: PaymentStatus;
   qpayInvoiceId?: string;
   qpayPaymentId?: string;
+  invoiceExpiresAt?: Date;
   paidAt?: Date;
+  qrImage?: string;
+  qrText?: string;
+  invoiceUrls?: QPayUrl[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,10 +32,14 @@ const PaymentSchema = new Schema<IPayment>(
     itemType:      { type: String, enum: ['course', 'merch'], required: true },
     itemId:        { type: Schema.Types.ObjectId, required: true },
     amount:        { type: Number, required: true, min: 0 },
-    status:        { type: String, enum: ['PENDING', 'PAID', 'FAILED', 'REFUNDED'], default: 'PENDING' },
-    qpayInvoiceId: { type: String },
-    qpayPaymentId: { type: String },
-    paidAt:        { type: Date },
+    status:            { type: String, enum: ['PENDING', 'PAID', 'FAILED', 'REFUNDED', 'CANCELLED'], default: 'PENDING' },
+    qpayInvoiceId:     { type: String },
+    qpayPaymentId:     { type: String },
+    invoiceExpiresAt:  { type: Date },
+    paidAt:            { type: Date },
+    qrImage:           { type: String },
+    qrText:            { type: String },
+    invoiceUrls:       { type: [Schema.Types.Mixed], default: undefined },
   },
   { timestamps: true }
 );

@@ -17,6 +17,7 @@ import {
   LogOut,
   User,
   Lock,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import EmptyState from "@/components/EmptyState";
@@ -29,6 +30,10 @@ import {
 import { useToast, getErrMsg } from "@/lib/toast";
 import { EMPTY_VIDEO_POSTER_SRC, fallbackToEmptyVideoPoster } from "@/lib/media";
 import { parseDriveFileId } from "@/lib/formatters";
+import {
+  userHasActiveCourseAccess,
+  getCourseAccessDaysRemaining,
+} from "@/lib/courseAccess";
 import Image from "next/image";
 
 const EMPTY_STATE_SURFACE: CSSProperties = {
@@ -65,21 +70,25 @@ export default function CourseDetailPage() {
   const [heroDriveFileId, setHeroDriveFileId] = useState<string | null>(null);
 
   const hasAccess = useCallback(() => {
-    if (!user || !course) return false;
+    if (!course) return false;
     if (course.isFree) return true;
-
-    const now = new Date();
-    return user.courseAccess.some(
-      (access) =>
-        access.courseId === courseId &&
-        new Date(access.expiresAt) > now
-    );
+    return userHasActiveCourseAccess(user, courseId);
   }, [user, course, courseId]);
 
   const handleLogout = async () => {
     await logout();
     router.push("/");
   };
+
+  const goToPurchaseOrLogin = useCallback(() => {
+    if (!course || course.isFree || hasAccess()) return;
+    if (!user) {
+      const next = encodeURIComponent(`/courses/${courseId}`);
+      router.push(`/login?next=${next}`);
+      return;
+    }
+    router.push(`/payment/${courseId}`);
+  }, [course, courseId, hasAccess, router, user]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -115,9 +124,20 @@ export default function CourseDetailPage() {
     ? [...course.lessons].sort((a, b) => a.order - b.order)
     : [];
 
+  const paidAccessRemainingLabel =
+    course && !course.isFree && user && hasAccess()
+      ? (() => {
+        const d = getCourseAccessDaysRemaining(user, courseId);
+        if (d === null) return "Эрхтэй";
+        if (d === 0) return "Өнөөдөр дуусна";
+        return `${d} өдөр үлдсэн`;
+      })()
+      : null;
+
   const isLessonAccessible = (lesson: CourseLessonPopulated): boolean => {
     if (!course) return false;
     if (course.isFree) return true;
+    if (hasAccess()) return true;
     const lessonObj = typeof lesson.lessonId === "object" ? lesson.lessonId : null;
     return lessonObj?.isPublished === true;
   };
@@ -174,7 +194,10 @@ export default function CourseDetailPage() {
 
           <div className="flex items-center gap-3">
             {user && (
-              <div className="flex items-center gap-2 text-sm">
+              <Link
+                href="/account"
+                className="flex items-center gap-2 text-sm rounded-xl px-2 py-1 hover:opacity-90 transition-opacity"
+              >
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center bg-surface-alt"
                   style={{
@@ -183,10 +206,11 @@ export default function CourseDetailPage() {
                 >
                   <User className="w-4 h-4 text-primary" />
                 </div>
-                <span className="font-medium hidden sm:inline text-foreground">
+                <span className="font-medium hidden sm:inline text-foreground max-w-[10rem] truncate">
                   {user.name}
                 </span>
-              </div>
+                <Settings className="w-4 h-4 text-muted shrink-0" aria-hidden />
+              </Link>
             )}
             {user && (
               <motion.button
@@ -246,10 +270,15 @@ export default function CourseDetailPage() {
                       <CalendarDays size={16} className="text-primary" />
                       {course.durationDays} өдөр
                     </span>
-                    {!course.isFree && (
+                    {!course.isFree && !hasAccess() && (
                       <span className="inline-flex items-center gap-1.5 font-semibold tabular-nums text-[#18181b]">
                         <CircleDollarSign size={16} className="text-primary" />
                         ₮{course.price.toLocaleString()}
+                      </span>
+                    )}
+                    {paidAccessRemainingLabel !== null && (
+                      <span className="inline-flex items-center gap-1.5 font-semibold px-2 py-1 rounded-lg text-success bg-success/10">
+                        {paidAccessRemainingLabel}
                       </span>
                     )}
                     {course.isFree && (
@@ -259,12 +288,13 @@ export default function CourseDetailPage() {
                     )}
                   </div>
                 </div>
-                {!course.isFree && !hasAccess() && user && (
+                {!course.isFree && !hasAccess() && (
                   <motion.button
-                    onClick={() => router.push(`/payment/${courseId}`)}
+                    type="button"
+                    onClick={goToPurchaseOrLogin}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-6 py-3 rounded-xl text-base font-semibold text-white flex items-center gap-2 bg-primary"
+                    className="px-4 py-2 rounded-xl text-base font-semibold text-white flex items-center gap-2 bg-primary cursor-pointer"
                     style={{
                       boxShadow: "4px 4px 10px rgba(43, 95, 111, 0.25)",
                     }}
@@ -314,9 +344,10 @@ export default function CourseDetailPage() {
                           <p className="text-xs opacity-60 text-center max-w-[220px]">
                             Курс худалдан авснаар бүх хичээлд нэвтрэх боломжтой
                           </p>
-                          {user && !course.isFree && (
+                          {!course.isFree && !hasAccess() && (
                             <motion.button
-                              onClick={() => router.push(`/payment/${courseId}`)}
+                              type="button"
+                              onClick={goToPurchaseOrLogin}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               className="mt-1 px-5 py-2 rounded-xl text-sm font-semibold bg-primary text-white"

@@ -28,7 +28,7 @@ export default function PaymentsPage() {
   }, []);
 
   const columns: Column<Payment>[] = [
-    { key: "user", label: "Хэрэглэгч", render: (r: any) => r.userId?.name ?? r.userId.name?.slice(0, 10) ?? "—" },
+    { key: "user", label: "Хэрэглэгч", render: (r: any) => r.userId?.name ?? r.userId?.name?.slice(0, 10) ?? "—" },
     {
       key: "course",
       label: "Курс",

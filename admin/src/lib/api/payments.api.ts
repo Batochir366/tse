@@ -2,14 +2,14 @@ import apiClient from "../apiClient";
 
 export interface Payment {
   _id: string;
-  userId: string;
+  userId: { _id: string; name: string; email: string } | string;
   itemId: string;
   itemType: string;
   amount: number;
   status: string;
   createdAt: string;
-  user?: { name: string; email: string };
-  course?: { name: string };
+  updatedAt?: string;
+  course?: { _id: string; name: string };
 }
 
 export const paymentsApi = {

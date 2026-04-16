@@ -23,7 +23,11 @@ export interface MeResponse {
   email: string;
   phone?: string;
   avatar?: string;
-  courseAccess: { courseId: string; expiresAt: string }[];
+  courseAccess: {
+    courseId: string;
+    expiresAt: string;
+    reminder7dSentAt?: string;
+  }[];
 }
 
 export const authApi = {
@@ -53,4 +57,24 @@ export const authApi = {
       resetToken,
       newPassword,
     }),
+
+  patchMe: (data: { name?: string; phone?: string }) =>
+    apiClient.patch<MeResponse>("/api/auth/me", data),
+
+  requestChangePasswordOtp: () =>
+    apiClient.post<{ message: string }>(
+      "/api/auth/change-password/request-otp",
+    ),
+
+  confirmChangePassword: (data: { otp: string; newPassword: string }) =>
+    apiClient.post<{ message: string }>(
+      "/api/auth/change-password/confirm",
+      data,
+    ),
+
+  uploadAvatar: (file: File) => {
+    const fd = new FormData();
+    fd.append("image", file);
+    return apiClient.post<{ avatar: string }>("/api/auth/avatar", fd);
+  },
 };

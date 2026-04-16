@@ -4,6 +4,8 @@ import bcrypt from 'bcryptjs';
 export interface ICourseAccess {
   courseId: mongoose.Types.ObjectId;
   expiresAt: Date;
+  /** 7 хоногийн сануулах имэйл илгээсэн эсэх */
+  reminder7dSentAt?: Date;
 }
 
 export interface IUser extends Document {
@@ -16,6 +18,8 @@ export interface IUser extends Document {
   refreshToken?: string;
   resetOtp?: string;
   resetOtpExpires?: Date;
+  changePasswordOtp?: string;
+  changePasswordOtpExpires?: Date;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -27,6 +31,7 @@ const CourseAccessSchema = new Schema<ICourseAccess>(
   {
     courseId: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
     expiresAt: { type: Date, required: true },
+    reminder7dSentAt: { type: Date, required: false },
   },
   { _id: false }
 );
@@ -42,6 +47,8 @@ const UserSchema = new Schema<IUser>(
     refreshToken:     { type: String, select: false },
     resetOtp:         { type: String, select: false },
     resetOtpExpires:  { type: Date, select: false },
+    changePasswordOtp:         { type: String, select: false },
+    changePasswordOtpExpires:  { type: Date, select: false },
     isActive:         { type: Boolean, default: true },
   },
   { timestamps: true }

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { adminLogin, adminRefresh, adminLogout, getAdminMe } from '../controllers/adminAuthController';
+import { adminLogin, adminRefresh, adminLogout, getAdminMe, getAllUsers } from '../controllers/adminAuthController';
 import { protect } from '../middleware/authMiddleware';
 import { isAdmin } from '../middleware/adminMiddleware';
 
@@ -9,5 +9,6 @@ router.post('/login',   adminLogin);
 router.post('/refresh', adminRefresh);
 router.post('/logout',  adminLogout);
 router.get('/me',       protect, isAdmin, getAdminMe);
+router.get('/users',    protect, isAdmin, getAllUsers);
 
 export default router;

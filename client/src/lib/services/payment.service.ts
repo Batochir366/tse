@@ -17,4 +17,12 @@ export const paymentService = {
   getMyPayments: async (): Promise<Payment[]> => {
     return await paymentApi.getMyPayments();
   },
+
+  cancelPayment: async (paymentId: string) => {
+    return await paymentApi.cancelPayment(paymentId);
+  },
+
+  resumePayment: async (paymentId: string) => {
+    return await paymentApi.resumePayment(paymentId);
+  },
 };

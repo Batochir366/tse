@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Admin from '../models/Admin';
+import User from '../models/User';
 import { signAccess, signRefresh, verifyRefresh } from '../utils/jwt';
 
 const COOKIE_OPTIONS = {
@@ -84,4 +85,12 @@ export const getAdminMe = async (
     return;
   }
   res.json({ id: admin._id, name: admin.name, email: admin.email, role: admin.role });
+};
+
+export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
+  const users = await User.find()
+    .select('name email phone isActive createdAt')
+    .sort({ createdAt: -1 })
+    .lean();
+  res.json(users);
 };
