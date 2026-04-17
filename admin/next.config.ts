@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "192.168.1.15",
     "https://microphysical-tameka-explicitly.ngrok-free.dev",
-    nextPublicApiUrl,
+    "https://tse-5l34.onrender.com",
   ],
   crossOrigin: "use-credentials",
 };

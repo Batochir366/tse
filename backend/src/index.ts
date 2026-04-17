@@ -34,6 +34,7 @@ const defaultAllowedOrigins = [
   "http://localhost:3001",
   "http://localhost:3002",
   "http://localhost:3003",
+  "https://tse-5l34.onrender.com",
 ];
 
 function buildAllowedOrigins(): string[] {
