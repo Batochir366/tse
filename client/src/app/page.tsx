@@ -66,7 +66,7 @@ export default function HomePage() {
               width={100}
               height={50}
             />
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">TSE Academy</h1>
+            <h1 className="text-xs sm:text-2xl font-bold tracking-tight text-foreground">TSE Academy</h1>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted">
