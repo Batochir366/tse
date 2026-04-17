@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import axios from "axios";
-import Payment from "../models/Payment";
+import mongoose from "mongoose";
+import Payment, { type PaymentItemType } from "../models/Payment";
 import Course from "../models/Course";
 import User from "../models/User";
 import { AuthRequest } from "../middleware/authMiddleware";
@@ -317,19 +318,17 @@ export const resumePayment = async (
   });
 };
 
-// Admin — бүх төлбөр (курсын нэрийг itemType=course үед хавсаргана)
-export const getAllPayments = async (
-  _req: Request,
-  res: Response,
-): Promise<void> => {
-  const payments = await Payment.find()
-    .populate("userId", "name email")
-    .sort({ createdAt: -1 })
-    .lean();
+type PaymentLeanRow = {
+  itemType: PaymentItemType;
+  itemId: unknown;
+} & Record<string, unknown>;
 
+async function attachCourseNamesToPayments(
+  payments: PaymentLeanRow[],
+): Promise<Array<PaymentLeanRow & { course?: { _id: unknown; name: string } }>> {
   const courseIds = payments
     .filter((p) => p.itemType === "course")
-    .map((p) => p.itemId);
+    .map((p) => p.itemId) as mongoose.Types.ObjectId[];
   const courses =
     courseIds.length > 0
       ? await Course.find({ _id: { $in: courseIds } })
@@ -338,13 +337,56 @@ export const getAllPayments = async (
       : [];
   const courseMap = new Map(courses.map((c) => [String(c._id), c]));
 
-  const enriched = payments.map((p) => ({
+  return payments.map((p) => ({
     ...p,
     course:
       p.itemType === "course" ? courseMap.get(String(p.itemId)) : undefined,
   }));
+}
 
-  res.json(enriched);
+// Admin — бүх төлбөр (курсын нэрийг itemType=course үед хавсаргана)
+// Query: limit байхгүй бол бүгдийг буцаана (dashboard). limit-тэй бол { items, total, page, pageSize }.
+export const getAllPayments = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const baseQuery = Payment.find()
+    .populate("userId", "name email")
+    .sort({ createdAt: -1 });
+
+  const limitRaw = req.query.limit;
+  const parsedLimit =
+    limitRaw !== undefined && String(limitRaw) !== ""
+      ? parseInt(String(limitRaw), 10)
+      : NaN;
+  const usePagination = !Number.isNaN(parsedLimit) && parsedLimit > 0;
+
+  if (!usePagination) {
+    const payments = await baseQuery.lean();
+    res.json(
+      await attachCourseNamesToPayments(payments as unknown as PaymentLeanRow[]),
+    );
+    return;
+  }
+
+  const pageSize = Math.min(100, Math.max(1, parsedLimit));
+  const page = Math.max(1, parseInt(String(req.query.page ?? "1"), 10) || 1);
+  const skip = (page - 1) * pageSize;
+
+  const [payments, total] = await Promise.all([
+    Payment.find()
+      .populate("userId", "name email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(pageSize)
+      .lean(),
+    Payment.countDocuments(),
+  ]);
+
+  const items = await attachCourseNamesToPayments(
+    payments as unknown as PaymentLeanRow[],
+  );
+  res.json({ items, total, page, pageSize });
 };
 
 // Хэрэглэгч — PENDING төлбөрийг QPay болон DB дээр цуцлах

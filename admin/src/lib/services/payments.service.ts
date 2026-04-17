@@ -1,4 +1,4 @@
-import { paymentsApi } from "../api/payments.api";
+import { paymentsApi, type PaymentsListPage } from "../api/payments.api";
 
 export const paymentsService = {
   getAll: async () => {
@@ -7,6 +7,16 @@ export const paymentsService = {
       return res.data;
     } catch (error) {
       console.log("paymentsService.getAll error", error);
+      throw error;
+    }
+  },
+
+  getPage: async (page: number, pageSize: number): Promise<PaymentsListPage> => {
+    try {
+      const res = await paymentsApi.getPage(page, pageSize);
+      return res.data;
+    } catch (error) {
+      console.log("paymentsService.getPage error", error);
       throw error;
     }
   },

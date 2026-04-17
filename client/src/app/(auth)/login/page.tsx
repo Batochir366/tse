@@ -47,10 +47,11 @@ function LoginForm() {
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="relative w-full max-w-md mx-4"
+      className="relative w-full flex flex-col justify-center items-center"
     >
-      <div className="text-center mb-8">
+      <div className="text-center flex flex-col justify-center items-center mb-8">
         <Image style={{ width: "50px", height: "50px" }} src="/tse2.webp" alt="Logo" width={100} height={50} />
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Нэвтрэх</h1>
       </div>
 
       <motion.form
@@ -58,7 +59,7 @@ function LoginForm() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.35 }}
-        className="rounded-2xl p-8 flex flex-col gap-5 bg-background"
+        className="rounded-2xl p-8 flex flex-col gap-5 bg-background w-full max-w-md mx-4"
         style={{
           boxShadow: "8px 8px 16px rgba(0,0,0,0.1), -8px -8px 16px rgba(255,255,255,0.8)",
         }}

@@ -27,7 +27,7 @@ const httpServer = createServer(app);
 const PORT = process.env.PORT ?? 3000;
 
 /** Өдөр бүр (анхдагч 04:00). Өөр хуваарь: PAYMENT_EXPIRY_CRON node-cron синтакс */
-const PAYMENT_EXPIRY_CRON = process.env.PAYMENT_EXPIRY_CRON ?? "0 4 * * *";
+const PAYMENT_EXPIRY_CRON = process.env.PAYMENT_EXPIRY_CRON ?? "1 5 * * *";
 
 initSocket(httpServer);
 
