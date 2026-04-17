@@ -21,10 +21,9 @@ import paymentRoutes from "./routes/payments";
 import merchRoutes from "./routes/merch";
 import announcementRoutes from "./routes/announcements";
 import notificationRoutes from "./routes/notifications";
-
+const PORT = 3000;
 const app = express();
 const httpServer = createServer(app);
-const PORT = process.env.PORT || 3000;
 
 /** Өдөр бүр (анхдагч 04:00). Өөр хуваарь: PAYMENT_EXPIRY_CRON node-cron синтакс */
 const PAYMENT_EXPIRY_CRON = process.env.PAYMENT_EXPIRY_CRON || "0 4 * * *";
