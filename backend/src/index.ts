@@ -34,7 +34,9 @@ const defaultAllowedOrigins = [
   "http://localhost:3001",
   "http://localhost:3002",
   "http://localhost:3003",
+  "https://tse-drab.vercel.app",
   "https://tse-5l34.onrender.com",
+  "https://tse-lbdp.vercel.app",
 ];
 
 function buildAllowedOrigins(): string[] {
