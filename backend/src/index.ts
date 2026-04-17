@@ -21,7 +21,7 @@ import paymentRoutes from "./routes/payments";
 import merchRoutes from "./routes/merch";
 import announcementRoutes from "./routes/announcements";
 import notificationRoutes from "./routes/notifications";
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const app = express();
 const httpServer = createServer(app);
 
