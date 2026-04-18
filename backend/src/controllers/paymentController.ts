@@ -139,7 +139,7 @@ export const createInvoice = async (
       },
       { headers: { Authorization: `Bearer ${token}` } },
     );
-
+    console.log(invoiceRes, "invoiceRes");
     // QPay invoice id + QR (resume-д ашиглана)
     payment.qpayInvoiceId = invoiceRes.data.id;
     payment.invoiceExpiresAt = new Date(Date.now() + INVOICE_HOLD_MS);
@@ -167,9 +167,11 @@ export const qpayCallback = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
+  console.log("callback worked");
   const paymentIdRaw = req.query.invoice_id;
   const mongoPaymentId =
     typeof paymentIdRaw === "string" ? paymentIdRaw : undefined;
+  console.log("callback worked :", paymentIdRaw);
 
   // Query байхгүй — QPay зөвхөн URL шалгах GET
   if (!mongoPaymentId) {
@@ -325,7 +327,9 @@ type PaymentLeanRow = {
 
 async function attachCourseNamesToPayments(
   payments: PaymentLeanRow[],
-): Promise<Array<PaymentLeanRow & { course?: { _id: unknown; name: string } }>> {
+): Promise<
+  Array<PaymentLeanRow & { course?: { _id: unknown; name: string } }>
+> {
   const courseIds = payments
     .filter((p) => p.itemType === "course")
     .map((p) => p.itemId) as mongoose.Types.ObjectId[];
@@ -364,7 +368,9 @@ export const getAllPayments = async (
   if (!usePagination) {
     const payments = await baseQuery.lean();
     res.json(
-      await attachCourseNamesToPayments(payments as unknown as PaymentLeanRow[]),
+      await attachCourseNamesToPayments(
+        payments as unknown as PaymentLeanRow[],
+      ),
     );
     return;
   }
