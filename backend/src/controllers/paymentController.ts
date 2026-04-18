@@ -15,7 +15,7 @@ import type { IPayment } from "../models/Payment";
 const INVOICE_HOLD_MS = 10 * 60 * 1000;
 
 function paymentCallbackUrl(paymentMongoId: string): string {
-  return `${process.env.BACKEND_URL ?? ""}/api/payments/callback?invoice_id=${paymentMongoId}`;
+  return `${process.env.BACKEND_URL ?? "https://tse-5l34.onrender.com"}/api/payments/callback?invoice_id=${paymentMongoId}`;
 }
 interface QuickUser {
   id: string;
