@@ -24,7 +24,7 @@ export const markNotificationRead = async (
   const doc = await UserNotification.findOneAndUpdate(
     { _id: req.params.id, userId: req.user!.id },
     { readAt: new Date() },
-    { new: true },
+    { returnDocument: 'after' },
   ).lean();
 
   if (!doc) {

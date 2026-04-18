@@ -30,7 +30,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   const merch = await Merch.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   if (!merch) {
@@ -57,7 +57,7 @@ export const updateStock = async (req: Request, res: Response): Promise<void> =>
   const merch = await Merch.findByIdAndUpdate(
     req.params.id,
     { $set: { stock } },
-    { new: true }
+    { returnDocument: 'after' }
   );
 
   if (!merch) {

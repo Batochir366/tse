@@ -40,7 +40,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   const announcement = await Announcement.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   );
 
   if (!announcement) {

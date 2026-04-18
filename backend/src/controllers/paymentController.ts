@@ -47,7 +47,7 @@ async function finalizePaidCoursePayment(
   const payment = await Payment.findOneAndUpdate(
     { qpayInvoiceId: invoiceId, status: "PENDING" },
     { status: "PAID", qpayPaymentId, paidAt: new Date() },
-    { new: true },
+    { returnDocument: 'after' },
   );
   if (!payment) return null;
 

@@ -35,7 +35,7 @@ export const update = async (req: Request, res: Response): Promise<void> => {
   const lesson = await Lesson.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
-    { new: true, runValidators: true },
+    { returnDocument: 'after', runValidators: true },
   );
 
   if (!lesson) {
