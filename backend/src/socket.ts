@@ -1,20 +1,8 @@
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
+import { buildAllowedOrigins } from "./config/corsOrigins";
 
 let io: Server;
-
-function buildAllowedOrigins(): string[] {
-  const defaults = [
-    "http://localhost:3001",
-    "http://localhost:3002",
-    "http://localhost:3003",
-  ];
-  const fromEnv =
-    process.env.CORS_ORIGINS?.split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0) ?? [];
-  return [...new Set([...defaults, ...fromEnv])];
-}
 
 export const initSocket = (httpServer: HttpServer): Server => {
   io = new Server(httpServer, {

@@ -5,6 +5,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import cron from "node-cron";
 import connectDB from "./config/db";
+import { buildAllowedOrigins } from "./config/corsOrigins";
 import { encryptResponse } from "./middleware/encryptResponse";
 import { initSocket } from "./socket";
 import { expireStalePendingPayments } from "./services/paymentCancelService";
@@ -29,23 +30,6 @@ const httpServer = createServer(app);
 const PAYMENT_EXPIRY_CRON = process.env.PAYMENT_EXPIRY_CRON || "0 4 * * *";
 
 initSocket(httpServer);
-
-const defaultAllowedOrigins = [
-  "http://localhost:3001",
-  "http://localhost:3002",
-  "http://localhost:3003",
-  "https://tse-drab.vercel.app",
-  "https://tse-5l34.onrender.com",
-  "https://tse-lbdp.vercel.app",
-];
-
-function buildAllowedOrigins(): string[] {
-  const fromEnv =
-    process.env.CORS_ORIGINS?.split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0) ?? [];
-  return [...new Set([...defaultAllowedOrigins, ...fromEnv])];
-}
 
 app.use(
   cors({
