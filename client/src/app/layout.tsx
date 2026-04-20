@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   ...(metadataBase ? { metadataBase } : {}),
   title: "TSE Academy",
   description: "Онлайн сургалтын платформ",
+  icons: {
+    icon: "/logo-white-01.png",
+  },
 };
 
 export const viewport: Viewport = {
