@@ -66,7 +66,7 @@ export default function HomePage() {
               width={100}
               height={50}
             />
-            <h1 className="text-xs sm:text-2xl font-bold tracking-tight text-foreground">TSE Academy</h1>
+            <h1 className="text-xs sm:text-2xl font-bold tracking-tight text-foreground">Tse Academy</h1>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted">
@@ -152,7 +152,7 @@ export default function HomePage() {
                 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.1]"
               >
                 Мэргэжлээ өсгөхөд{" "}
-                <span className="text-primary">TSE Academy</span>
+                <span className="text-primary">Tse Academy</span>
               </motion.h1>
               <motion.p
                 variants={fadeUp}
@@ -208,7 +208,7 @@ export default function HomePage() {
               className="text-center max-w-2xl mx-auto mb-14"
             >
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                Яагаад TSE Academy вэ?
+                Яагаад Tse Academy вэ?
               </h2>
               <p className="mt-4 text-muted text-lg">
                 Сургалтыг танд ойлгомжтой, хүртээмжтэй байлгахад бид
@@ -386,7 +386,7 @@ export default function HomePage() {
               height={40}
             />
             <div>
-              <p className="font-semibold text-foreground text-sm">TSE Academy</p>
+              <p className="font-semibold text-foreground text-sm">Tse Academy</p>
               <p className="text-xs text-muted">© {new Date().getFullYear()}</p>
             </div>
           </div>

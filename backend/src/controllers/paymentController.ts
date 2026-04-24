@@ -47,7 +47,7 @@ async function finalizePaidCoursePayment(
   const payment = await Payment.findOneAndUpdate(
     { qpayInvoiceId: invoiceId, status: "PENDING" },
     { status: "PAID", qpayPaymentId, paidAt: new Date() },
-    { returnDocument: 'after' },
+    { returnDocument: "after" },
   );
   if (!payment) return null;
 
@@ -131,8 +131,8 @@ export const createInvoice = async (
           {
             default: true,
             account_bank_code: "050000",
-            account_number: "5676172124",
-            account_name: "ГАНХУЯГ БАТ-ОЧИР",
+            account_number: "5037170101",
+            account_name: "Ганхуяг Батцэцэг",
             is_default: true,
           },
         ],
